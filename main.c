@@ -26,7 +26,6 @@ extern WcMatrixT *screenBuff;
 LARGE_INTEGER time1;      //for FPS calculating
 LARGE_INTEGER time2;
 LARGE_INTEGER freq;
-double elapsedTime = 0;
 
 PROCESS_INFORMATION minimapProcInfo;
 HANDLE hPipe = INVALID_HANDLE_VALUE;
@@ -67,6 +66,15 @@ BOOL WINAPI ConsoleCtrlHandler(DWORD dwCtrlType);
                      ratio < 0.9 ?  '-' :                                   \
                      ' ';                                                   \
 }
+
+#define OUT_OF_MAP                              \
+(                                               \
+    ((int)playerInfo.fPlayerY) >= MAP_HEIGHT || \
+    ((int)playerInfo.fPlayerY) < 0 ||           \
+    ((int)playerInfo.fPlayerX) >= MAP_WIDTH ||  \
+    ((int)playerInfo.fPlayerX) < 0              \
+    ? TRUE : FALSE                              \
+)
 
 #define MINIMAP_ON ((hPipe != INVALID_HANDLE_VALUE && hPipeMsgThrd != INVALID_HANDLE_VALUE) ? TRUE : FALSE)
 #define MINIMAP_OFF ((hPipe == INVALID_HANDLE_VALUE && hPipeMsgThrd == INVALID_HANDLE_VALUE) ? TRUE : FALSE)
@@ -117,7 +125,6 @@ int main(int argc, char** argv)
 #endif
 
         QueryPerformanceCounter(&time2);
-        elapsedTime = (time1.QuadPart - time2.QuadPart) * BILLION / freq.QuadPart;
     }
 
     if (MINIMAP_ON)
@@ -265,8 +272,8 @@ void OnKeyDown(void *data)
         break;
     }
 
-    if (pMap->content[(int)playerInfo.fPlayerY][(int)playerInfo.fPlayerX] == '#')
-        playerInfo = playerInfoBak;     //if hits a wall, then undo the move
+    if (pMap->content[(int)playerInfo.fPlayerY][(int)playerInfo.fPlayerX] == '#' || OUT_OF_MAP)
+        playerInfo = playerInfoBak;     //if hits a wall or OOM, then undo the move
 }
 
 void LaunchMiniMap()
