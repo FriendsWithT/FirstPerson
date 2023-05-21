@@ -90,12 +90,8 @@ int main(int argc, char** argv)
     OsalOutputInitialize(SCREEN_HEIGHT, SCREEN_WIDTH);  //set up console properties
     GameInitialize();   //map loading, set up player position
 
-#ifndef DEBUG_MODE
-
     OsalInputKeyDownConnect(OnKeyDown);     //register key down event behavior
     OsalInputStartReceiving();
-
-#endif
 
     LaunchMiniMap();
 
@@ -112,17 +108,7 @@ int main(int argc, char** argv)
             DrawScreenCol(x, fDisToWall);
         }
 
-#ifndef DEBUG_MODE
-
         OsalOutputWrite();      //write actual data to console screen
-
-#else
-
-        wchar_t *tempBuff = NULL;
-        CONTENT_FLATTEN(screenBuff, tempBuff);
-        int holder = 0;
-
-#endif
 
         QueryPerformanceCounter(&time2);
     }

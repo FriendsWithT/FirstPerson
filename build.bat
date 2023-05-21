@@ -9,6 +9,8 @@ set OSAL_DIR=./osal
 set CC_FLAGS=-c -I %INCLUDE_DIR% -I %CC_DIR%/include
 set LINKER_FLAGS=-lkernel32 -luser32 -lmsvcrt
 
+set SUCCESS=1
+
 color 0f
 
 echo Building firstPerson.exe
@@ -29,7 +31,11 @@ call :EXEC_WITH_INFO "%CC% %BIN_DIR%/minimap.o %BIN_DIR%/osalProcess.o -o %TARGE
 
 echo.
 echo Buiding finished.
-call :ECHO_WITH_COLOR "You can run firstPerson.exe inside target folder." "Green"
+if %SUCCESS% neq 1 (
+	call :ECHO_WITH_COLOR "There were errors while executing this scipt. Building failed!" "Red"
+) else (
+	call :ECHO_WITH_COLOR "You can run firstPerson.exe inside target folder." "Green"
+)
 echo.
 pause
 goto :eof
@@ -37,6 +43,9 @@ goto :eof
 :EXEC_WITH_INFO
 @echo Executing command: %1
 %~1
+if %errorlevel% neq 0 (
+	set SUCCESS=0
+)
 goto :eof
 
 :ECHO_WITH_COLOR
