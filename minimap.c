@@ -4,7 +4,6 @@
 #include <osalProcess.h>
 
 #include <windows.h>
-#include <assert.h>
 #include <math.h>
 
 #define SCREEN_HEIGHT (MAP_HEIGHT + 10)
@@ -27,7 +26,7 @@ int main(int argc, char** argv)
     MinimapInitialize();
 
     hPipe = OsalPipeOpen(IPC_PIPE_NAME, TRUE);      //pipe to receive data from the main program 
-    assert(hPipe != INVALID_HANDLE_VALUE);  //exit if it's a nonexisted pipe
+    VERBOSE_ASSERT(hPipe != INVALID_HANDLE_VALUE);  //exit if it's a nonexisted pipe
 
     INT16 bRunning = TRUE;
     PipePayloadT *payload = (PipePayloadT*) malloc( sizeof(PipePayloadT) );
@@ -69,7 +68,7 @@ void MinimapInitialize()
 {
     if (!SetConsoleCtrlHandler(ConsoleCtrlHandler, TRUE))   //handle finalizing when user click close button
     {
-        assert(0);
+        VERBOSE_ASSERT(0);
     }
 
     OutputInitialize();
@@ -99,9 +98,9 @@ void OutputInitialize()
 void DisplayPosAndStat(PipePayloadT *payload, CoordT mergePos)
 {  
     PlayerInfoT playerInfo = payload->playerInfo;
-    screenBuff->content[mergePos.Y + (int)playerInfo.fPlayerY][mergePos.X + (int)playerInfo.fPlayerX] = 'P';    //indicate player's position
+    screenBuff->content[mergePos.Y + (int)playerInfo.playerPos.Y][mergePos.X + (int)playerInfo.playerPos.X] = 'P';    //indicate player's position
 
-    swprintf(screenBuff->content[MAP_HEIGHT + 5], L"X[%d], Y[%d]", (int)payload->playerInfo.fPlayerX, (int)payload->playerInfo.fPlayerY);
+    swprintf(screenBuff->content[MAP_HEIGHT + 5], L"X[%d], Y[%d]", (int)payload->playerInfo.playerPos.X, (int)payload->playerInfo.playerPos.Y);
     swprintf(screenBuff->content[MAP_HEIGHT + 6], L"Angle(degree) [%d]", RADIAN_TO_DEGREE(payload->playerInfo.fPlayerAngle));
 
     long elapsedTime = labs(((double)(payload->frameStartTime.QuadPart - payload->frameEndTime.QuadPart)) * BILLION / payload->timeFreq.QuadPart);

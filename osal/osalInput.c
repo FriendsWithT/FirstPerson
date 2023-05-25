@@ -1,6 +1,6 @@
 #include <osalInput.h>
 #include <osalTHread.h>
-#include <assert.h>
+#include <fpsCommon.h>
 
 inputEvtCallback _keyDownCallback;
 
@@ -18,7 +18,7 @@ void OsalInputKeyDownConnect(inputEvtCallback callback)
 
 void OsalInputKeyDownDisconnect()
 {
-    assert(_keyDownCallback);
+    VERBOSE_ASSERT(_keyDownCallback);
     _keyDownCallback = NULL;
 }
 
@@ -29,7 +29,7 @@ void OsalInputStartReceiving()
 
 void OsalInputStopReceiving()
 {
-    assert(_keyPrsHook);
+    VERBOSE_ASSERT(_keyPrsHook);
     PostQuitMessage(0);     //break the msg loop
     UnhookWindowsHookEx(_keyPrsHook);
 }
@@ -49,7 +49,7 @@ DWORD WINAPI _receiveLoop(LPVOID thrdArg)
         DispatchMessageW(&msg);
     }
 
-    assert(_thrdHdl);
+    VERBOSE_ASSERT(_thrdHdl);
     CloseHandle(_thrdHdl);
 
     return 0;       //thread exit

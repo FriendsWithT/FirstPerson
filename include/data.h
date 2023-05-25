@@ -1,7 +1,6 @@
 #pragma once
 #include "fpsCommon.h"
 #include <stdlib.h>
-#include <assert.h>
 #include <windows.h>
 
 typedef struct Size
@@ -24,8 +23,7 @@ typedef struct fCoord
 
 typedef struct PlayerInfo
 {
-    float fPlayerX;
-    float fPlayerY;
+    fCoordT playerPos;
     float fPlayerAngle;
 }PlayerInfoT;
 
@@ -73,7 +71,7 @@ typedef struct PipePayload
 #define MERGE_WCMTXES(pWcBiggerMatrix, pWcSmallerMatrix, coord) \
 {                                                               \
     /*invalid position check*/                                  \
-    assert(coord.X + (pWcSmallerMatrix)->size.nCol < (pWcBiggerMatrix)->size.nCol && coord.Y + (pWcSmallerMatrix)->size.nRow < (pWcBiggerMatrix)->size.nRow);    \
+    VERBOSE_ASSERT(coord.X + (pWcSmallerMatrix)->size.nCol < (pWcBiggerMatrix)->size.nCol && coord.Y + (pWcSmallerMatrix)->size.nRow < (pWcBiggerMatrix)->size.nRow);    \
                                                                 \
     int i = 0;                                                  \
     for (i; i < (pWcSmallerMatrix)->size.nRow; i++)             \

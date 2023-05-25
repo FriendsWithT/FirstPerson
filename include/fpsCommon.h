@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
+#include <windows.h>
+#include <stdio.h>
 
 #define UINT16 uint16_t
 #define UINT32 uint32_t
@@ -12,3 +14,16 @@
 #define BILLION 1000000000L
 
 #define RADIAN_TO_DEGREE(fRadian) (((int) round((fRadian * 180.0) / PI)) % 360)
+
+#define VERBOSE_ASSERT(expression)                  \
+{                                                   \
+    if (!(expression))                              \
+    {                                               \
+        char *msg;                                  \
+        msg = (char*)malloc(100);                   \
+        sprintf(msg, "Assertion \"%s\" failed, in file [%s], line [%d]", #expression, __FILE__, __LINE__);   \
+        MessageBox(NULL, msg, "Error", MB_OK);      \
+        free(msg);                                  \
+        exit(1);                                    \
+    }                                               \
+}

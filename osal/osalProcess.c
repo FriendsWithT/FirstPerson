@@ -1,5 +1,5 @@
 #include <osalProcess.h>
-#include <assert.h>
+#include <fpsCommon.h>
 
 #define PIPE_TIMEOUT 5000
 
@@ -98,7 +98,7 @@ UINT16 OsalPipeMsgSend(HANDLE hPipe, void *data, size_t size)
         else
         {
             // An error occurred while waiting for the overlapped operation to complete
-            assert(0);
+            VERBOSE_ASSERT(!"Pipe error");
         }
     }
 

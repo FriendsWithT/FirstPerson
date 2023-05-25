@@ -27,7 +27,7 @@ call :EXEC_WITH_INFO "%CC% %CC_FLAGS% main.c -o %BIN_DIR%/main.o"
 call :EXEC_WITH_INFO "%CC% %CC_FLAGS% minimap.c -o %BIN_DIR%/minimap.o"
 
 call :EXEC_WITH_INFO "%CC% %BIN_DIR%/main.o %BIN_DIR%/osalInput.o %BIN_DIR%/osalOutput.o %BIN_DIR%/osalThread.o %BIN_DIR%/osalProcess.o -o %TARGET_DIR%/firstPerson.exe %LINKER_FLAGS%"
-call :EXEC_WITH_INFO "%CC% %BIN_DIR%/minimap.o %BIN_DIR%/osalProcess.o -o %TARGET_DIR%/minimap.exe"
+call :EXEC_WITH_INFO "%CC% %BIN_DIR%/minimap.o %BIN_DIR%/osalProcess.o -o %TARGET_DIR%/minimap.exe %LINKER_FLAGS%"
 
 echo.
 echo Buiding finished.

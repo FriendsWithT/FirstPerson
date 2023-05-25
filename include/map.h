@@ -1,4 +1,5 @@
 #include "data.h"
+#include "fpsCommon.h"
 #include <wchar.h>
 
 #define MAP_HEIGHT 16
@@ -6,7 +7,7 @@
 
 #define INI_MAP_ROW(pWcMatrixMap, row, wRowContent)             \
 {                                                               \
-    assert(wcslen(wRowContent) == MAP_WIDTH);                   \
+    VERBOSE_ASSERT(wcslen(wRowContent) == MAP_WIDTH);                   \
     size_t rowSize = MAP_WIDTH * sizeof(wchar_t);               \
     memcpy((pWcMatrixMap)->content[row], wRowContent, rowSize); \
 }

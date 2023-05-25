@@ -1,6 +1,5 @@
 #include <math.h>
 #include <wchar.h>
-#include <assert.h>
 
 #include <osalOutput.h>
 #include <osalInput.h>
@@ -67,13 +66,13 @@ BOOL WINAPI ConsoleCtrlHandler(DWORD dwCtrlType);
                      ' ';                                                   \
 }
 
-#define OUT_OF_MAP                              \
-(                                               \
-    ((int)playerInfo.fPlayerY) >= MAP_HEIGHT || \
-    ((int)playerInfo.fPlayerY) < 0 ||           \
-    ((int)playerInfo.fPlayerX) >= MAP_WIDTH ||  \
-    ((int)playerInfo.fPlayerX) < 0              \
-    ? TRUE : FALSE                              \
+#define OUT_OF_MAP(coord)           \
+(                                   \
+    ((int)coord.Y) >= MAP_HEIGHT || \
+    ((int)coord.Y) < 0 ||           \
+    ((int)coord.X) >= MAP_WIDTH ||  \
+    ((int)coord.X) < 0              \
+    ? TRUE : FALSE                  \
 )
 
 #define MINIMAP_ON ((hPipe != INVALID_HANDLE_VALUE && hPipeMsgThrd != INVALID_HANDLE_VALUE) ? TRUE : FALSE)
@@ -124,13 +123,13 @@ void GameInitialize()
 {
     if (!SetConsoleCtrlHandler(ConsoleCtrlHandler, TRUE))   //handle finalizing when user click close button
     {
-        assert(0);
+        VERBOSE_ASSERT(0);
     }
 
     LOAD_MAP(pMap);
 
-    playerInfo.fPlayerX = 8.0f;
-    playerInfo.fPlayerY = 8.0f;
+    playerInfo.playerPos.X = 8.0f;
+    playerInfo.playerPos.Y = 8.0f;
     playerInfo.fPlayerAngle = 0.0f;
 }
 
@@ -146,7 +145,7 @@ float CastRay(int screenCol)
 {
     float fRayAngle = (playerInfo.fPlayerAngle - fFOV / 2.0f) + ((float)screenCol / (float)SCREEN_WIDTH) * fFOV;
     float fDisToWall = 0;
-    UINT16 bHitWall = 0;
+    UINT16 bHitWall = FALSE;
 
     fCoordT eyeVector;      //indicates the direction of the ray, it's also a unit vector
     eyeVector.X = sin(fRayAngle);
@@ -159,19 +158,19 @@ float CastRay(int screenCol)
         fDisToWall += 0.1f;
 
         CoordT rayEndPoint;
-        rayEndPoint.X = (int)(playerInfo.fPlayerX + eyeVector.X * fDisToWall);
-        rayEndPoint.Y = (int)(playerInfo.fPlayerY + eyeVector.Y * fDisToWall);
+        rayEndPoint.X = (int)(playerInfo.playerPos.X + eyeVector.X * fDisToWall);
+        rayEndPoint.Y = (int)(playerInfo.playerPos.Y + eyeVector.Y * fDisToWall);
 
-        if (rayEndPoint.X < 0 || rayEndPoint.X >= MAP_WIDTH || rayEndPoint.Y < 0 || rayEndPoint.Y >= MAP_HEIGHT)
+        if (OUT_OF_MAP(rayEndPoint))
         {
             // Ray has travelled out of map
-            bHitWall = 1;
+            bHitWall = TRUE;
             fDisToWall = fMaxDis;
         }
         else
         {
             if (pMap->content[rayEndPoint.Y][rayEndPoint.X] == '#')
-                bHitWall = 1;
+                bHitWall = TRUE;
         }
     }
 
@@ -225,23 +224,23 @@ void OnKeyDown(void *data)
         break;
 
     case 'W':
-        playerInfo.fPlayerX += sin(playerInfo.fPlayerAngle) * 0.1f;
-        playerInfo.fPlayerY += cos(playerInfo.fPlayerAngle) * 0.1f;
+        playerInfo.playerPos.X += sin(playerInfo.fPlayerAngle) * 0.1f;
+        playerInfo.playerPos.Y += cos(playerInfo.fPlayerAngle) * 0.1f;
         break;
 
     case 'S':
-        playerInfo.fPlayerX -= sin(playerInfo.fPlayerAngle) * 0.1f;
-        playerInfo.fPlayerY -= cos(playerInfo.fPlayerAngle) * 0.1f;
+        playerInfo.playerPos.X -= sin(playerInfo.fPlayerAngle) * 0.1f;
+        playerInfo.playerPos.Y -= cos(playerInfo.fPlayerAngle) * 0.1f;
         break;
 
     case 'D':
-        playerInfo.fPlayerX += cos(playerInfo.fPlayerAngle) * 0.1f;
-        playerInfo.fPlayerY += - (sin(playerInfo.fPlayerAngle) * 0.1f);
+        playerInfo.playerPos.X += cos(playerInfo.fPlayerAngle) * 0.1f;
+        playerInfo.playerPos.Y += - (sin(playerInfo.fPlayerAngle) * 0.1f);
         break;
 
     case 'A':
-        playerInfo.fPlayerX += - (cos(playerInfo.fPlayerAngle) * 0.1f);
-        playerInfo.fPlayerY += sin(playerInfo.fPlayerAngle) * 0.1f;
+        playerInfo.playerPos.X += - (cos(playerInfo.fPlayerAngle) * 0.1f);
+        playerInfo.playerPos.Y += sin(playerInfo.fPlayerAngle) * 0.1f;
         break;
 
     case '\t':
@@ -250,7 +249,7 @@ void OnKeyDown(void *data)
         else if (MINIMAP_ON)
             CloseMiniMap();
         else
-            assert(!"Bad operation");
+            VERBOSE_ASSERT(!"Bad operation");
         break;
 
     case '0':
@@ -258,13 +257,13 @@ void OnKeyDown(void *data)
         break;
     }
 
-    if (pMap->content[(int)playerInfo.fPlayerY][(int)playerInfo.fPlayerX] == '#' || OUT_OF_MAP)
+    if (pMap->content[(int)playerInfo.playerPos.Y][(int)playerInfo.playerPos.X] == '#' || OUT_OF_MAP(playerInfo.playerPos))
         playerInfo = playerInfoBak;     //if hits a wall or OOM, then undo the move
 }
 
 void LaunchMiniMap()
 {
-    assert(MINIMAP_OFF);
+    VERBOSE_ASSERT(MINIMAP_OFF);
 
     bMinimapStop = FALSE;
     minimapProcInfo = OsalSpawnChildProcess("./minimap.exe");
@@ -274,7 +273,7 @@ void LaunchMiniMap()
 
 void CloseMiniMap()
 {
-    assert(MINIMAP_ON);
+    VERBOSE_ASSERT(MINIMAP_ON);
 
     bMinimapStop = TRUE;    //this will be sent to minimap process via pipe
     WaitForSingleObject(minimapProcInfo.hProcess, INFINITE);     //waits for the process to exit
@@ -294,7 +293,7 @@ DWORD WINAPI PipeMsgLoop(LPVOID thrdArg)
     UINT16 bSending = TRUE;
     while (bSending)
     {
-        assert(hPipe);
+        VERBOSE_ASSERT(hPipe);
 
         PipePayloadT payload;
         payload.playerInfo = playerInfo;
