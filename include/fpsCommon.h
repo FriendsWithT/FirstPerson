@@ -15,13 +15,13 @@
 
 #define RADIAN_TO_DEGREE(fRadian) (((int) round((fRadian * 180.0) / PI)) % 360)
 
-#define VERBOSE_ASSERT(expression)                  \
+#define VERBOSE_ASSERT(expression, extraMsg)        \
 {                                                   \
     if (!(expression))                              \
     {                                               \
         char *msg;                                  \
         msg = (char*)malloc(100);                   \
-        sprintf(msg, "Assertion \"%s\" failed, in file [%s], line [%d]", #expression, __FILE__, __LINE__);   \
+        sprintf(msg, "Assertion \"%s\" failed, in file [%s], line [%d]\nExtra info: %s", #expression, __FILE__, __LINE__, extraMsg ? extraMsg : "None");   \
         MessageBox(NULL, msg, "Error", MB_OK);      \
         free(msg);                                  \
         exit(1);                                    \

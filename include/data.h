@@ -71,7 +71,7 @@ typedef struct PipePayload
 #define MERGE_WCMTXES(pWcBiggerMatrix, pWcSmallerMatrix, coord) \
 {                                                               \
     /*invalid position check*/                                  \
-    VERBOSE_ASSERT(coord.X + (pWcSmallerMatrix)->size.nCol < (pWcBiggerMatrix)->size.nCol && coord.Y + (pWcSmallerMatrix)->size.nRow < (pWcBiggerMatrix)->size.nRow);    \
+    VERBOSE_ASSERT(coord.X + (pWcSmallerMatrix)->size.nCol < (pWcBiggerMatrix)->size.nCol && coord.Y + (pWcSmallerMatrix)->size.nRow < (pWcBiggerMatrix)->size.nRow, NULL);    \
                                                                 \
     int i = 0;                                                  \
     for (i; i < (pWcSmallerMatrix)->size.nRow; i++)             \

@@ -18,18 +18,19 @@ void OsalInputKeyDownConnect(inputEvtCallback callback)
 
 void OsalInputKeyDownDisconnect()
 {
-    VERBOSE_ASSERT(_keyDownCallback);
+    VERBOSE_ASSERT(_keyDownCallback, "KeyDown event hasn't got any callback");
     _keyDownCallback = NULL;
 }
 
 void OsalInputStartReceiving()
 {
+    VERBOSE_ASSERT(_keyDownCallback, "KeyDown event hasn't got any callback");
     _thrdHdl = OsalDefaultThreadCreate(_receiveLoop, NULL);
 }
 
 void OsalInputStopReceiving()
 {
-    VERBOSE_ASSERT(_keyPrsHook);
+    VERBOSE_ASSERT(_keyPrsHook, "Invalid hook");
     PostQuitMessage(0);     //break the msg loop
     UnhookWindowsHookEx(_keyPrsHook);
 }
@@ -49,7 +50,7 @@ DWORD WINAPI _receiveLoop(LPVOID thrdArg)
         DispatchMessageW(&msg);
     }
 
-    VERBOSE_ASSERT(_thrdHdl);
+    VERBOSE_ASSERT(_thrdHdl, "Invalid thread handle");
     CloseHandle(_thrdHdl);
 
     return 0;       //thread exit

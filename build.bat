@@ -5,6 +5,7 @@ set INCLUDE_DIR=./include
 set BIN_DIR=./bin
 set TARGET_DIR=./target
 set OSAL_DIR=./osal
+set PRELOAD_DIR=./preLoad
 
 set CC_FLAGS=-c -I %INCLUDE_DIR% -I %CC_DIR%/include
 set LINKER_FLAGS=-lkernel32 -luser32 -lmsvcrt
@@ -23,11 +24,14 @@ call :EXEC_WITH_INFO "%CC% %CC_FLAGS% %OSAL_DIR%/osalOutput.c -o %BIN_DIR%/osalO
 call :EXEC_WITH_INFO "%CC% %CC_FLAGS% %OSAL_DIR%/osalInput.c -o %BIN_DIR%/osalInput.o"
 call :EXEC_WITH_INFO "%CC% %CC_FLAGS% %OSAL_DIR%/osalThread.c -o %BIN_DIR%/osalThread.o"
 call :EXEC_WITH_INFO "%CC% %CC_FLAGS% %OSAL_DIR%/osalProcess.c -o %BIN_DIR%/osalProcess.o"
+call :EXEC_WITH_INFO "%CC% %CC_FLAGS% %PRELOAD_DIR%/plMap.c -o %BIN_DIR%/plMap.o"
 call :EXEC_WITH_INFO "%CC% %CC_FLAGS% main.c -o %BIN_DIR%/main.o"
 call :EXEC_WITH_INFO "%CC% %CC_FLAGS% minimap.c -o %BIN_DIR%/minimap.o"
 
-call :EXEC_WITH_INFO "%CC% %BIN_DIR%/main.o %BIN_DIR%/osalInput.o %BIN_DIR%/osalOutput.o %BIN_DIR%/osalThread.o %BIN_DIR%/osalProcess.o -o %TARGET_DIR%/firstPerson.exe %LINKER_FLAGS%"
-call :EXEC_WITH_INFO "%CC% %BIN_DIR%/minimap.o %BIN_DIR%/osalProcess.o -o %TARGET_DIR%/minimap.exe %LINKER_FLAGS%"
+call :EXEC_WITH_INFO "%CC% %BIN_DIR%/main.o %BIN_DIR%/osalInput.o %BIN_DIR%/osalOutput.o %BIN_DIR%/osalThread.o %BIN_DIR%/osalProcess.o %BIN_DIR%/plMap.o -o %TARGET_DIR%/firstPerson.exe %LINKER_FLAGS%"
+call :EXEC_WITH_INFO "%CC% %BIN_DIR%/minimap.o %BIN_DIR%/osalProcess.o %BIN_DIR%/plMap.o -o %TARGET_DIR%/minimap.exe %LINKER_FLAGS%"
+
+call :EXEC_WITH_INFO "copy map.txt target\map.txt"
 
 echo.
 echo Buiding finished.

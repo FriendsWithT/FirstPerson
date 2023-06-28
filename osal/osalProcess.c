@@ -98,7 +98,7 @@ UINT16 OsalPipeMsgSend(HANDLE hPipe, void *data, size_t size)
         else
         {
             // An error occurred while waiting for the overlapped operation to complete
-            VERBOSE_ASSERT(!"Pipe error");
+            VERBOSE_ASSERT(0, "Pipe error");
         }
     }
 

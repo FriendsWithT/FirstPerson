@@ -6,21 +6,22 @@
 #include <osalThread.h>
 #include <osalProcess.h>
 #include <data.h>
-#include <map.h>
+#include <plMap.h>
 #include <fpsCommon.h>
 #include <w32Extras.h>
 
 #define SCREEN_HEIGHT 160
 #define SCREEN_WIDTH 480
-#define RAY_MAX_DIS MAP_HEIGHT > MAP_WIDTH ? MAP_HEIGHT : MAP_WIDTH
+#define RAY_MAX_DIS 16
 
-WcMatrixT *pMap = NULL;
 PlayerInfoT playerInfo;
 UINT16 bPlaying = TRUE;
 
 float fFOV = PI / 4.0f;     //field of view
 
 extern WcMatrixT *screenBuff;
+extern WcMatrixT *pMap;
+extern CoordT *spawnPt;
 
 LARGE_INTEGER time1;      //for FPS calculating
 LARGE_INTEGER time2;
@@ -66,17 +67,19 @@ BOOL WINAPI ConsoleCtrlHandler(DWORD dwCtrlType);
                      ' ';                                                   \
 }
 
-#define OUT_OF_MAP(coord)           \
-(                                   \
-    ((int)coord.Y) >= MAP_HEIGHT || \
-    ((int)coord.Y) < 0 ||           \
-    ((int)coord.X) >= MAP_WIDTH ||  \
-    ((int)coord.X) < 0              \
-    ? TRUE : FALSE                  \
+#define OUT_OF_MAP(coord)                   \
+(                                           \
+    ((int)coord.Y) >= pMap->size.nRow ||    \
+    ((int)coord.Y) < 0 ||                   \
+    ((int)coord.X) >= pMap->size.nCol ||    \
+    ((int)coord.X) < 0                      \
+    ? TRUE : FALSE                          \
 )
 
 #define MINIMAP_ON ((hPipe != INVALID_HANDLE_VALUE && hPipeMsgThrd != INVALID_HANDLE_VALUE) ? TRUE : FALSE)
 #define MINIMAP_OFF ((hPipe == INVALID_HANDLE_VALUE && hPipeMsgThrd == INVALID_HANDLE_VALUE) ? TRUE : FALSE)
+
+#define WALL_CH '#'
 
 /*
  *  =====================================
@@ -123,19 +126,20 @@ void GameInitialize()
 {
     if (!SetConsoleCtrlHandler(ConsoleCtrlHandler, TRUE))   //handle finalizing when user click close button
     {
-        VERBOSE_ASSERT(0);
+        VERBOSE_ASSERT(0, NULL);
     }
 
-    LOAD_MAP(pMap);
+    UINT16 bFromFile = TRUE;
+    plLoadMap(bFromFile);
 
-    playerInfo.playerPos.X = 8.0f;
-    playerInfo.playerPos.Y = 8.0f;
+    playerInfo.playerPos.X = (float) spawnPt->X;
+    playerInfo.playerPos.Y = (float) spawnPt->Y;
     playerInfo.fPlayerAngle = 0.0f;
 }
 
 void GameFinalize()
 {
-    CLEAN_MAP(pMap);
+    plCleanMap();
 }
 
 /*
@@ -169,7 +173,7 @@ float CastRay(int screenCol)
         }
         else
         {
-            if (pMap->content[rayEndPoint.Y][rayEndPoint.X] == '#')
+            if (pMap->content[rayEndPoint.Y][rayEndPoint.X] == WALL_CH)
                 bHitWall = TRUE;
         }
     }
@@ -249,7 +253,7 @@ void OnKeyDown(void *data)
         else if (MINIMAP_ON)
             CloseMiniMap();
         else
-            VERBOSE_ASSERT(!"Bad operation");
+            VERBOSE_ASSERT(0, "Bad operation");
         break;
 
     case '0':
@@ -257,13 +261,13 @@ void OnKeyDown(void *data)
         break;
     }
 
-    if (pMap->content[(int)playerInfo.playerPos.Y][(int)playerInfo.playerPos.X] == '#' || OUT_OF_MAP(playerInfo.playerPos))
+    if (pMap->content[(int)playerInfo.playerPos.Y][(int)playerInfo.playerPos.X] == WALL_CH || OUT_OF_MAP(playerInfo.playerPos))
         playerInfo = playerInfoBak;     //if hits a wall or OOM, then undo the move
 }
 
 void LaunchMiniMap()
 {
-    VERBOSE_ASSERT(MINIMAP_OFF);
+    VERBOSE_ASSERT(MINIMAP_OFF, "Minimap already opened");
 
     bMinimapStop = FALSE;
     minimapProcInfo = OsalSpawnChildProcess("./minimap.exe");
@@ -273,7 +277,7 @@ void LaunchMiniMap()
 
 void CloseMiniMap()
 {
-    VERBOSE_ASSERT(MINIMAP_ON);
+    VERBOSE_ASSERT(MINIMAP_ON, "Minimap hasn't been launched yet");
 
     bMinimapStop = TRUE;    //this will be sent to minimap process via pipe
     WaitForSingleObject(minimapProcInfo.hProcess, INFINITE);     //waits for the process to exit
@@ -293,7 +297,7 @@ DWORD WINAPI PipeMsgLoop(LPVOID thrdArg)
     UINT16 bSending = TRUE;
     while (bSending)
     {
-        VERBOSE_ASSERT(hPipe);
+        VERBOSE_ASSERT(hPipe, "Invalid pipe");
 
         PipePayloadT payload;
         payload.playerInfo = playerInfo;
