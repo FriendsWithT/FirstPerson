@@ -13,7 +13,6 @@ DWORD _dwBytesWritten;
 void OsalOutputInitialize(UINT16 nScreenHeight, UINT16 nScreenWidth)
 {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    
 
     CONSOLE_FONT_INFOEX fontInfo = { sizeof(CONSOLE_FONT_INFOEX) };
     GetCurrentConsoleFontEx(hConsole, FALSE, &fontInfo);
@@ -31,6 +30,11 @@ void OsalOutputInitialize(UINT16 nScreenHeight, UINT16 nScreenWidth)
 
     SetConsoleActiveScreenBuffer(_hScreen);
     _dwBytesWritten = 0;
+
+    //disable console resizing
+    HWND _hWindow = GetConsoleWindow();
+    DeleteMenu(GetSystemMenu(_hWindow, FALSE), SC_MAXIMIZE, MF_BYCOMMAND);
+    SetWindowLong(_hWindow, GWL_STYLE, GetWindowLong(_hWindow, GWL_STYLE) & ~WS_MAXIMIZEBOX & ~WS_SIZEBOX);
 }
 
 /*
