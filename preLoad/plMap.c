@@ -104,7 +104,7 @@ void _plLoadFromFile()
         int j = 0;
         for (j; j < len; j++)
         {
-            VERBOSE_ASSERT(currLine[j] == '#' || currLine[j] == '.' || currLine[j] == 'x', "Map tokens should be: \"#\" for wall, \".\" for empty space, \"x\" for spawn point");
+            VERBOSE_ASSERT(currLine[j] == '#' || currLine[j] == '.' || currLine[j] == 'x', "Map tokens should be: \"#\" for wall, \".\" for empty space, \"x\" for spawn point. Please also remove any newlines, spaces if any.");
             if (currLine[j] == 'x')
             {
                 VERBOSE_ASSERT(!spawnPt, "Spawn point already existed");   //spawn point already exist
@@ -125,7 +125,7 @@ void _plLoadFromFile()
     }
 
     VERBOSE_ASSERT(spawnPt, "Missing spawn point");    //missing spawn point
-
+    VERBOSE_ASSERT(mapHeight > 4 && mapWidth > 4, "Map too narrow");
     free(buff);
     fclose(pFile);
 }

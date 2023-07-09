@@ -97,6 +97,11 @@ void OutputInitialize()
     ALLOC_WCMTX(screenBuff, SCREEN_HEIGHT, SCREEN_WIDTH);
     hScreen = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
     SetConsoleActiveScreenBuffer(hScreen);
+
+    //disable console resizing
+    HWND _hWindow = GetConsoleWindow();
+    DeleteMenu(GetSystemMenu(_hWindow, FALSE), SC_MAXIMIZE, MF_BYCOMMAND);
+    SetWindowLong(_hWindow, GWL_STYLE, GetWindowLong(_hWindow, GWL_STYLE) & ~WS_MAXIMIZEBOX & ~WS_SIZEBOX);
 }
 
 void DisplayPosAndStat(PipePayloadT *payload, CoordT mergePos)
