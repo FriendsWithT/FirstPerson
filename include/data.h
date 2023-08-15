@@ -37,9 +37,6 @@ typedef struct WcMatrix
 typedef struct PipePayload
 {
     PlayerInfoT playerInfo;
-    LARGE_INTEGER frameStartTime;
-    LARGE_INTEGER frameEndTime;
-    LARGE_INTEGER timeFreq;
     UINT16 bStop;
 }PipePayloadT;
 

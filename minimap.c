@@ -111,12 +111,6 @@ void DisplayPosAndStat(PipePayloadT *payload, CoordT mergePos)
 
     swprintf(screenBuff->content[pMap->size.nRow + 5], L"X[%d], Y[%d]", (int)payload->playerInfo.playerPos.X, (int)payload->playerInfo.playerPos.Y);
     swprintf(screenBuff->content[pMap->size.nRow + 6], L"Angle(degree) [%d]", RADIAN_TO_DEGREE(payload->playerInfo.fPlayerAngle));
-
-    long elapsedTime = labs(((double)(payload->frameStartTime.QuadPart - payload->frameEndTime.QuadPart)) * BILLION / payload->timeFreq.QuadPart);
-    wmemset(screenBuff->content[pMap->size.nRow + 7], L' ', SCREEN_WIDTH);
-    swprintf(screenBuff->content[pMap->size.nRow + 7], L"Frame duaration(nanosec) [%ld]", elapsedTime);
-    wmemset(screenBuff->content[pMap->size.nRow + 8], L' ', SCREEN_WIDTH);
-    swprintf(screenBuff->content[pMap->size.nRow + 8], L"Frame drawn per sec [%ld]", lround((double)BILLION / (double)elapsedTime));
 }
 
 void OutputPrint()

@@ -23,10 +23,6 @@ extern WcMatrixT *screenBuff;
 extern WcMatrixT *pMap;
 extern CoordT *spawnPt;
 
-LARGE_INTEGER time1;      //for FPS calculating
-LARGE_INTEGER time2;
-LARGE_INTEGER freq;
-
 PROCESS_INFORMATION minimapProcInfo;
 HANDLE hPipe = INVALID_HANDLE_VALUE;
 HANDLE hPipeMsgThrd = INVALID_HANDLE_VALUE;
@@ -99,9 +95,6 @@ int main(int argc, char** argv)
 
     while(bPlaying)
     {
-        QueryPerformanceFrequency(&freq);
-        QueryPerformanceCounter(&time1);
-
         UINT16 x = 0;
         for (x; x < SCREEN_WIDTH; x++)      //for every collumn cast a ray and draw that screen collumn base on ray's travelled distance
         {
@@ -111,8 +104,6 @@ int main(int argc, char** argv)
         }
 
         OsalOutputWrite();      //write actual data to console screen
-
-        QueryPerformanceCounter(&time2);
     }
 
     if (MINIMAP_ON)
@@ -301,9 +292,6 @@ DWORD WINAPI PipeMsgLoop(LPVOID thrdArg)
 
         PipePayloadT payload;
         payload.playerInfo = playerInfo;
-        payload.frameStartTime = time1;
-        payload.frameEndTime = time2;
-        payload.timeFreq = freq;
         payload.bStop = bMinimapStop;
 
         UINT16 writeResult = OsalPipeMsgSend(hPipe, &payload, sizeof(payload));
