@@ -1,5 +1,7 @@
 ## 3D first person perspective with ray casting
 
+![](https://github.com/FriendsWithT/FirstPerson/blob/main/showcase.gif)
+
 This project is inspired by javidx9's video on how to make a FPS game on console window. I implemented his idea and algorithm but in C language.
 
 Here is his video: https://youtu.be/xW8skO7MFYw
